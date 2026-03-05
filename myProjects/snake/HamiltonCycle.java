@@ -9,7 +9,7 @@ public class HamiltonCycle
 	static int[][] grid;
 	public static void main(String[] args)
 	{
-		hamiltonCycle(8,9);
+		hamiltonCycle(12,12);
 	}
 	static public int[] hamiltonCycle(int row,int col)
 	{
@@ -33,7 +33,7 @@ public class HamiltonCycle
 				pos++;
 			}
 		}
-		int loop=1,max=0;
+		int loop=1;
 		
 		while(!isCompletelyVisited())
 		{
@@ -47,33 +47,36 @@ public class HamiltonCycle
 					visited[i][j]=false;
 				}
 			}
-			int h=0,v=0,i=0,tempmax=0;
+			int h=0,v=0,i=0;
 			visited[h][v]=true;
 			path[0]=grid[h][v];
 			
-			int backtrack=0;
+			int backtrack=0,max=i;
 			
 			while(true)
 			{
-				tempmax++;
-				//System.out.println(tempmax);
 				visited[h][v]=true;
 				path[i]=grid[h][v];
 				
 				
 				
-				boolean[] conditions=checkAllConditions(h,v,i);
+				boolean[] conditions=sideChecker(h,v,i+1);
 				if(conditions[0])
 				{
-					System.out.println("blocked start ");
+					System.out.println("complete");
 					break;
 				}
-				if(conditions[7]||conditions[8])
+			
+				if(conditions[5]||conditions[6]||conditions[8])
 				{
-					printGrid();
-					int back=i-(x*y)/6;
-					System.out.println(" going back "+backtrack++);
-					if(backtrack>x*y*(x+y)/4)
+					//printGrid();
+					int back=i-Math.max(x, y)/2;
+					//System.out.println(" going back "+backtrack);
+					//if(i<max)
+						backtrack++;
+					//else 
+						//max=i;
+					if(backtrack>5*Math.max(x,y))
 					{
 						back=i-(x*y)/4;
 						backtrack=0;
@@ -89,16 +92,42 @@ public class HamiltonCycle
 						
 					}
 					i++;
+					
 				}
-				conditions=checkAllConditions(h,v,i);
-				if(conditions[5]|| !conditions[6])
+				conditions=sideChecker(h,v,i+1);
+				while(conditions[7]||conditions[8])
 				{
-					System.out.println("no space");
-					break;
+					int back=i-Math.max(x, y);
+					//System.out.println(" going back "+backtrack);
+					//if(i<max)
+						backtrack++;
+					//else 
+						//max=i;
+					if(backtrack>5*Math.max(x,y))
+					{
+						back=i-3*(x*y)/4;
+						backtrack=0;
+					}
+					if(0>back)
+						back=0;
+					while(i>back)
+					{
+						visited[h][v]=false;
+						h=path[i]/y;
+						v=path[i]%y;
+						i--;
+						
+					}
+					i++;
+					conditions=sideChecker(h,v,i+1);
+					if(!conditions[7]&&conditions[8])		
+					{
+						break;
+					}
 				}
 				
 				
-				int temph=h,tempv=v;
+			
 				ArrayList<Integer> moves=new ArrayList<>();
 				moves.add(0);
 				moves.add(1);
@@ -149,12 +178,12 @@ public class HamiltonCycle
 					}
 				}
 				i++;
+				if(i%20==0)
+				{
 				printGrid();
+				System.out.println("_________________________________");
+				}
 			}
-			if(tempmax>max)
-				max=tempmax;
-			//System.out.println(" max: "+tempmax);
-			System.out.println(" loop: "+loop);
 		}
 		
 		for(int i=0;i<path.length;i++)
@@ -195,11 +224,10 @@ public class HamiltonCycle
 			System.out.println("|");
 		}
 	}
-	static boolean[][] tempVisited;
-	static int minSpaces,space;
-	static boolean checkAvailableSpacesCount(int h,int v,int visitCount)
+	
+	static boolean[] sideChecker(int h,int v,int s)
 	{
-		tempVisited=new boolean[x][y];
+		boolean[][] tempVisited=new boolean[x][y];
 		for(int i=0;i<x;i++)
 		{
 			for(int j=0;j<y;j++)
@@ -207,25 +235,82 @@ public class HamiltonCycle
 				tempVisited[i][j]=visited[i][j];
 			}
 		}
-		space=0;
-		minSpaces=(x*y-visitCount-2);
-		recrusiveChecker(h,v);
-		if(space>=minSpaces)
-		{
-			return false;
-		}
-		return true;
-	}
-	static void recrusiveChecker(int h,int v)
-	{
 		boolean up=false,down=false,right=false,left=false;
-
-		if(space>=minSpaces)
+		boolean startblock=false ,end=false,divideCheck=false,sideChecks=false;
+		if(s==x*y)
 		{
-			return ;
+			return new boolean[]{true};
+		}
+		if((visited[0][1] && visited[1][0]))
+		{
+			startblock=true;
 		}
 		if(h+1>=x)
 		{
+			right=true;
+		}
+		else if(tempVisited[h+1][v])
+		{
+			right=true;
+		}
+		if(h-1<0)
+		{
+			left=true;
+		}
+		else if(tempVisited[h-1][v])
+		{
+			left=true;
+		}
+		if(v-1<0)
+		{
+			up=true;
+		}
+		else if(tempVisited[h][v-1])
+		{
+			up=true;
+		}
+		if(v+1>=y)
+		{
+			down=true;
+		}
+		else if(tempVisited[h][v+1])
+		{
+			down=true;
+		}
+		if(right&&left&&!up&&!down)
+			divideCheck=true;
+		if(!right&&!left&&up&&down)
+			divideCheck=true;
+		if(up && down && right && left)
+		{
+			sideChecks=true;
+		}
+		for(int i=0;i<x;i++)
+		{
+			for(int j=0;j<y;j++)
+			{
+				tempVisited[i][j]=visited[i][j];
+			}
+		}
+		int space=recrusiveChecker(h,v,0,tempVisited);
+		//System.out.println(space);
+		boolean spacecount=false;
+		if(space<(x*y-s))
+			spacecount=true;
+			
+		boolean[] conditions= {end,right,left,down,up,startblock,divideCheck,sideChecks,spacecount};
+		return conditions;	
+	}
+	static int recrusiveChecker(int h,int v,int space,boolean[][] tempVisited)
+	{
+		if(h>=x||h<0||v>=y||v<0)
+			return space;
+		boolean up=false,down=false,right=false,left=false;
+		
+		
+		if(h>=x-1)
+		{
+			
 			right=true;
 		}
 		else if(tempVisited[h+1][v])
@@ -236,15 +321,13 @@ public class HamiltonCycle
 		{
 			space++;
 			tempVisited[h+1][v]=true;
-			recrusiveChecker(h+1,v);
+			
+			space=recrusiveChecker(h+1,v,space,tempVisited);
 		}
 
-		if(space>=minSpaces)
+		if(h<=0)
 		{
-			return ;
-		}
-		if(h-1<0)
-		{
+			
 			left=true;
 		}
 		else if(tempVisited[h-1][v])
@@ -255,15 +338,10 @@ public class HamiltonCycle
 		{
 			space++;
 			tempVisited[h-1][v]=true;
-			recrusiveChecker(h-1,v);
+			space=recrusiveChecker(h-1,v,space,tempVisited);
 		}
-		if(space>=minSpaces)
-		{
-			return ;
-		}
-
-
-		if(v-1<0)
+		
+		if(v<=0)
 		{
 			up=true;
 		}
@@ -275,14 +353,10 @@ public class HamiltonCycle
 		{
 			space++;
 			tempVisited[h][v-1]=true;
-			recrusiveChecker(h,v-1);
+			space=recrusiveChecker(h,v-1,space,tempVisited);
 		}
 		
-		if(space>=minSpaces)
-		{
-			return ;
-		}
-		if(v+1>=y)
+		if(v>=y-1)
 		{
 			down=true;
 		}
@@ -294,113 +368,8 @@ public class HamiltonCycle
 		{
 			space++;
 			tempVisited[h][v+1]=true;
-			recrusiveChecker(h,v+1);
+			space=recrusiveChecker(h,v+1,space,tempVisited);
 		}	
-		return ;
-	}
-	static boolean[] checkAllConditions(int h,int v,int i)
-	{
-		boolean startblock=false ,end=false,availSpace=true,sideChecks=false;
-		if(i==x*y-1 )
-		{
-			return new boolean[]{true};
-		}
-		if((visited[0][1] && visited[1][0]))
-		{
-			startblock=true;
-		}
-		boolean up=false,down=false,right=false,left=false,rend=false,lend=false,uend=false,dend=false;
-		int rspace=0,lspace=0,uspace=0,dspace=0;
-		if(h+1>=x)
-		{
-			right=true;
-		}
-		else if(visited[h+1][v] )
-		{
-			right=true;
-		}
-		else if(checkAvailableSpacesCount(h+1,v,i))
-		{
-			System.out.println("right ");
-			rend=true;
-			right=true;
-		}
-		else 
-		{
-			rspace=space;
-		}
-		if(v+1>=y)
-		{
-			down=true;
-		}
-		else if(visited[h][v+1])
-		{
-			down=true;
-		}
-		else if(checkAvailableSpacesCount(h,v+1,i))
-		{
-			System.out.println("down ");
-			dend=true;
-			down=true;
-		}
-		else
-		{
-			dspace=space;
-		}
-		if(h-1<0)
-		{
-			left=true;
-		}
-		else if(visited[h-1][v])
-		{
-			left=true;
-		}
-		else if(checkAvailableSpacesCount(h-1,v,i))
-		{
-			System.out.println("left");
-			lend=true;
-			left=true;
-		}
-		else
-		{
-			lspace=space;
-		}
-		if(v-1<0)
-		{
-			up=true;
-		}
-		else if(visited[h][v-1])
-		{
-			up=true;
-		}
-		else if(checkAvailableSpacesCount(h,v-1,i))
-		{
-			System.out.println("up ");
-			uend=true;
-			up=true;
-		}
-		else
-		{
-			uspace=space;
-		}
-		if(up && down && right && left)
-		{
-			sideChecks=true;
-		}
-		int m1=Math.max(rspace,lspace);
-		int m2=Math.max(dspace,uspace);
-		int m=Math.max(m1, m2);
-		if (m!=0)
-		{
-			if((rspace+lspace+uspace+dspace)%m!=0)
-			{
-				availSpace=false;
-			}
-		}
-		boolean finalcheck=false;
-		if(rend||lend||uend||dend)
-		finalcheck=true;
-		boolean[] conditions= {end,right,left,down,up,sideChecks,availSpace,finalcheck,startblock};
-		return conditions;
+		return space;
 	}
 }

@@ -14,14 +14,15 @@ public class SnakeGame implements KeyListener,ActionListener
 	JLabel[] body=new JLabel[2500];
 	JLabel[] midbody=new JLabel[2500];
 	JLabel point,pointDisplay;
-	int length,s,b,d,n,w,h,x,y;
+	int length,s,b,d,n,w,h,x,y,td;
 	char move;
 	boolean automate,stop;
 
 	SnakeGame()
 	{
-		x=6;
-		y=6;
+		x=14;
+		y=12;
+		td=2;
 		d=700/y;
 		w=4+d*x;
 		while(w>1500)
@@ -419,7 +420,7 @@ public class SnakeGame implements KeyListener,ActionListener
 					moveSnake('w');
 				}
 				try {
-					Thread.sleep(10);
+					Thread.sleep(td);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
