@@ -9,7 +9,7 @@ public class HamiltonCycle
 	static int[][] grid;
 	public static void main(String[] args)
 	{
-		hamiltonCycle(12,12);
+		hamiltonCycle(20,20);
 	}
 	static public int[] hamiltonCycle(int row,int col)
 	{
@@ -37,7 +37,7 @@ public class HamiltonCycle
 		
 		while(!isCompletelyVisited())
 		{
-			printGrid();
+			printGrid(-1,-1);
 			System.out.println("Loop: "+loop);
 			loop++;
 			for(int i=0;i<x;i++)
@@ -51,14 +51,34 @@ public class HamiltonCycle
 			visited[h][v]=true;
 			path[0]=grid[h][v];
 			
-			int backtrack=0,max=i;
+			int backtrack=0,backtrack2=0,max=i,endtrack=0;
 			
 			while(true)
 			{
 				visited[h][v]=true;
 				path[i]=grid[h][v];
 				
-				
+				//printGrid(h,v);
+				//System.out.println("_________________________________");
+				/*
+				if(holeCheck(h,v))
+				{
+					//printGrid(h,v);
+					//System.out.println("_________________________________");
+					int back=i-3;
+					if(0>back)
+						back=0;
+					while(i>back)
+					{
+						visited[h][v]=false;
+						h=path[i]/y;
+						v=path[i]%y;
+						i--;
+						
+					}
+					i++;
+				}
+				*/
 				
 				boolean[] conditions=sideChecker(h,v,i+1);
 				if(conditions[0])
@@ -66,21 +86,37 @@ public class HamiltonCycle
 					System.out.println("complete");
 					break;
 				}
-			
-				if(conditions[5]||conditions[6]||conditions[8])
+				
+				
+				
+				if(conditions[5]||conditions[6]||conditions[8]||holeCheck(h,v))
 				{
-					//printGrid();
-					int back=i-Math.max(x, y)/2;
-					//System.out.println(" going back "+backtrack);
-					//if(i<max)
+					int back;
+					
+					if(conditions[5]||conditions[6]||conditions[8])
+						back=i-6;
+					else
+					
+						back=i-3;
 						backtrack++;
-					//else 
-						//max=i;
-					if(backtrack>5*Math.max(x,y))
+						if(backtrack%10==0)
+						{
+						printGrid(h,v);
+						System.out.println("_________________________________");
+						}
+					if(backtrack>300)
 					{
 						back=i-(x*y)/4;
 						backtrack=0;
+						backtrack2++;
 					}
+					
+					if(backtrack2>2000)
+					{
+						back=i-(x*y)/2;
+						backtrack2=0;
+					}
+					
 					if(0>back)
 						back=0;
 					while(i>back)
@@ -94,19 +130,27 @@ public class HamiltonCycle
 					i++;
 					
 				}
+				
+				
+				
 				conditions=sideChecker(h,v,i+1);
 				while(conditions[7]||conditions[8])
 				{
-					int back=i-Math.max(x, y);
+					int back=i-Math.max(x,y);
 					//System.out.println(" going back "+backtrack);
 					//if(i<max)
-						backtrack++;
+						endtrack++;
+						if(endtrack%100==0)
+						{
+						//printGrid(h,v);
+						//System.out.println("_________________________________");
+						}
 					//else 
 						//max=i;
-					if(backtrack>5*Math.max(x,y))
+					if(endtrack>5*Math.max(x,y))
 					{
-						back=i-3*(x*y)/4;
-						backtrack=0;
+						back=i-2*(x*y)/3;
+						endtrack=0;
 					}
 					if(0>back)
 						back=0;
@@ -125,6 +169,7 @@ public class HamiltonCycle
 						break;
 					}
 				}
+				conditions=sideChecker(h,v,i+1);
 				
 				
 			
@@ -178,11 +223,8 @@ public class HamiltonCycle
 					}
 				}
 				i++;
-				if(i%20==0)
-				{
-				printGrid();
-				System.out.println("_________________________________");
-				}
+				
+				
 			}
 		}
 		
@@ -191,7 +233,7 @@ public class HamiltonCycle
 			System.out.println(path[i]);
 		}
 		
-		printGrid();
+		printGrid(-1,-1);
 		return path;
 	}
 	static boolean isCompletelyVisited()
@@ -206,7 +248,7 @@ public class HamiltonCycle
 		}
 		return true;
 	}
-	static void printGrid()
+	static void printGrid(int h,int v)
 	{
 		for(int i=0;i<x;i++)
 		{
@@ -214,7 +256,12 @@ public class HamiltonCycle
 			{
 				if(visited[i][j])
 				{
-					System.out.print("|[]");
+					if(h==i && v==j)
+					{
+						System.out.print("|00");
+					}
+					else
+						System.out.print("|[]");
 				}
 				else
 				{
@@ -297,7 +344,7 @@ public class HamiltonCycle
 		boolean spacecount=false;
 		if(space<(x*y-s))
 			spacecount=true;
-			
+		//boolean hole=holeCheck(h,v);
 		boolean[] conditions= {end,right,left,down,up,startblock,divideCheck,sideChecks,spacecount};
 		return conditions;	
 	}
@@ -371,5 +418,71 @@ public class HamiltonCycle
 			space=recrusiveChecker(h,v+1,space,tempVisited);
 		}	
 		return space;
+	}
+	static boolean holeCheck(int h,int v)
+	{
+		boolean[][] tempVisited=new boolean[x][y];
+		for(int i=0;i<x;i++)
+		{
+			for(int j=0;j<y;j++)
+			{
+				tempVisited[i][j]=visited[i][j];
+			}
+		}
+		tempVisited[h][v]=false;
+		int xlow=h-3,ylow=v-3,xup=h+3,yup=v+3;
+
+		if(xlow<0)
+			xlow=0;
+		if(ylow<0)
+			ylow=0;
+		if(xup>x-1)
+			xup=v-1;
+		if(yup>y-1)
+			yup=y-1;
+		for(int i=xlow;i<=xup;i++)
+		{
+			for(int j=ylow;j<=yup;j++)
+			{
+				int count=0;
+				if((i==0&&j==1)||(i==1&&j==0)||tempVisited[i][j]||(i==h&&j==v))
+					continue;
+				if(i-1<0)
+				{
+					count++;
+				}
+				else if(tempVisited[i-1][j])
+				{
+					count++;
+				}
+				if(j-1<0)
+				{
+					count++;
+				}
+				else if(tempVisited[i][j-1])
+				{
+					count++;
+				}
+				if(i+1>=x)
+				{
+					count++;
+				}
+				else if(tempVisited[i+1][j])
+				{
+					count++;
+				}
+				if(j+1>=y)
+				{
+					count++;
+				}
+				else if(tempVisited[i][j+1])
+				{
+					count++;
+				}
+				if(count==3)
+					return true;
+			}
+		}
+		return false;
 	}
 }

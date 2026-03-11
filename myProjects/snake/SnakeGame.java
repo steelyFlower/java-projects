@@ -20,9 +20,9 @@ public class SnakeGame implements KeyListener,ActionListener
 
 	SnakeGame()
 	{
-		x=14;
-		y=12;
-		td=2;
+		x=20;
+		y=20;
+		td=0;
 		d=700/y;
 		w=4+d*x;
 		while(w>1500)
