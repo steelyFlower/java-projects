@@ -9,7 +9,7 @@ public class HamiltonCycle
 	static int[][] grid;
 	public static void main(String[] args)
 	{
-		hamiltonCycle(20,20);
+		hamiltonCycle(22,22);
 	}
 	static public int[] hamiltonCycle(int row,int col)
 	{
@@ -94,27 +94,37 @@ public class HamiltonCycle
 					int back;
 					
 					if(conditions[5]||conditions[6]||conditions[8])
+					{
+						
 						back=i-6;
+						
+						
+					}
 					else
-					
+					{
 						back=i-3;
-						backtrack++;
-						if(backtrack%10==0)
-						{
-						printGrid(h,v);
-						System.out.println("_________________________________");
-						}
+					}
+					backtrack++;
+					//printGrid(h,v);
+					//System.out.println("_________________________________");
+						
+	
 					if(backtrack>300)
 					{
 						back=i-(x*y)/4;
 						backtrack=0;
 						backtrack2++;
+						//printGrid(h,v);
+						//System.out.println("=============================");
+						
 					}
 					
-					if(backtrack2>2000)
+					if(backtrack2>100)
 					{
 						back=i-(x*y)/2;
 						backtrack2=0;
+						printGrid(h,v);
+						System.out.println("_________________________________");
 					}
 					
 					if(0>back)
@@ -440,6 +450,10 @@ public class HamiltonCycle
 			xup=v-1;
 		if(yup>y-1)
 			yup=y-1;
+		xlow=0;
+		xup=x-1;
+		ylow=0;
+		yup=y-1;
 		for(int i=xlow;i<=xup;i++)
 		{
 			for(int j=ylow;j<=yup;j++)

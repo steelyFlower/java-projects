@@ -22,7 +22,7 @@ public class SnakeGame implements KeyListener,ActionListener
 	{
 		x=20;
 		y=20;
-		td=0;
+		td=1;
 		d=700/y;
 		w=4+d*x;
 		while(w>1500)
